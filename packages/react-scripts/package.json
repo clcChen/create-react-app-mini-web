@@ -1,10 +1,10 @@
 {
-  "name": "react-scripts",
+  "name": "yw-react-scripts",
   "version": "5.0.1",
-  "description": "Configuration and scripts for Create React App.",
+  "description": "YW Configuration and scripts for Create React App.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/facebook/create-react-app.git",
+    "url": "https://github.com/clcChen/create-react-app-mini-web",
     "directory": "packages/react-scripts"
   },
   "license": "MIT",
