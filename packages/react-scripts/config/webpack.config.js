@@ -55,6 +55,9 @@ const babelRuntimeRegenerator = require.resolve('@babel/runtime/regenerator', {
   paths: [babelRuntimeEntry],
 });
 
+const reactRuntime = require.resolve('react/jsx-runtime');
+const reactDevRuntime = require.resolve('react/jsx-dev-runtime');
+
 // Some apps do not need the benefits of saving a web request, so not inlining the chunk
 // makes for a smoother build process.
 const shouldInlineRuntimeChunk = process.env.INLINE_RUNTIME_CHUNK !== 'false';
@@ -321,6 +324,8 @@ module.exports = function (webpackEnv) {
         .map(ext => `.${ext}`)
         .filter(ext => useTypeScript || !ext.includes('ts')),
       alias: {
+        'react/jsx-runtime': reactRuntime,
+        'react/jsx-dev-runtime': reactDevRuntime,
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
@@ -344,6 +349,8 @@ module.exports = function (webpackEnv) {
           babelRuntimeEntry,
           babelRuntimeEntryHelpers,
           babelRuntimeRegenerator,
+          reactRuntime,
+          reactDevRuntime,
         ]),
       ],
     },
@@ -355,7 +362,7 @@ module.exports = function (webpackEnv) {
           enforce: 'pre',
           exclude: /@babel(?:\/|\\{1,2})runtime/,
           test: /\.(js|mjs|jsx|ts|tsx|css)$/,
-          loader: require.resolve('source-map-loader'),
+          use: 'source-map-loader',
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -631,8 +638,6 @@ module.exports = function (webpackEnv) {
             : undefined
         )
       ),
-      fs.existsSync(paths.appFederationConfig) &&
-      new ModuleFederationPlugin(require(paths.appFederationConfig)),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
