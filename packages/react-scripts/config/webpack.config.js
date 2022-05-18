@@ -233,7 +233,7 @@ module.exports = function (webpackEnv) {
       // webpack uses `publicPath` to determine where the app is being served from.
       // It requires a trailing slash, or the file assets will get an incorrect path.
       // We inferred the "public path" (such as / or /my-project) from homepage.
-      publicPath: paths.publicUrlOrPath,
+      publicPath: fs.existsSync(paths.appFederationConfig) ? 'auto' : paths.publicUrlOrPath,
       // Point sourcemap entries to original disk location (format as URL on Windows)
       devtoolModuleFilenameTemplate: isEnvProduction
         ? info =>
@@ -362,7 +362,7 @@ module.exports = function (webpackEnv) {
           enforce: 'pre',
           exclude: /@babel(?:\/|\\{1,2})runtime/,
           test: /\.(js|mjs|jsx|ts|tsx|css)$/,
-          use: 'source-map-loader',
+          loader: require.resolve('source-map-loader'),
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -635,9 +635,19 @@ module.exports = function (webpackEnv) {
                 minifyURLs: true,
               },
             }
+            : undefined,
+          fs.existsSync(paths.appFederationConfig)
+            ? {
+              userOptions: {
+                publicPath: paths.publicUrlOrPath,
+                excludeChunks: [require(paths.appFederationConfig).name],
+              },
+            }
             : undefined
         )
       ),
+      fs.existsSync(paths.appFederationConfig) &&
+      new ModuleFederationPlugin(require(paths.appFederationConfig)),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
